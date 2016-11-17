@@ -55,7 +55,7 @@ class SimplisticHandler extends Actor {
 		case Received(data) =>
 			val stringData = data.decodeString(Charset.defaultCharset())
 			val byteData = ServerController.giveReply(stringData)
-			replyTo ! Write(byteData)
+			sender() ! Write(byteData)
 		case d: DeadLetter => println(d)
 		case PeerClosed => context stop self
 		case _ => println("tu! ")
