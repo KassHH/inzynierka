@@ -53,40 +53,6 @@
 			<groupId>com.typesafe.akka</groupId>
 			<artifactId>akka-remote_2.11</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-contrib_2.11</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-http-core_2.11</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-agent_2.11</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-camel_2.11</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-cluster_2.11</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-cluster-metrics_2.11</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-cluster-sharding_2.11</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.typesafe.akka</groupId>
-			<artifactId>akka-cluster-tools_2.11</artifactId>
-		</dependency>
-
 	</dependencies>
 
 

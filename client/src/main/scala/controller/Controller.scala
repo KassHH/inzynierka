@@ -51,7 +51,7 @@ object Controller extends JFXApp {
 		})
 	}
 
-	def showUsers(users: mutable.LinkedHashMap[Long, String]): Unit = {
+	def showUsers(users: mutable.HashMap[Long, String]): Unit = {
 		println(users.aggregate("\n")(_ + _._2, _ + _))
 		MainWindow.receivedText.text = users.aggregate("\n")(_ + _._2, _ + _)
 	}

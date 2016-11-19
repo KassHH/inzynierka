@@ -27,9 +27,9 @@ object ServerController {
 			case a: CredentialsMessage =>
 				reply = credentialsActionCheck(a).pickle.value
 			case a: CheckMessage => print(a.getCheck)
-			case a: Logged => reply = AvailableUsers(a.getId, Server.connections
-				.map { case (key, value) => (key, value.path.name) })
-				.pickle.value
+			case a: Logged =>
+				val s = AvailableUsers(a.getId, connectedUsers.pickle.value)
+				reply = s.pickle.value
 		}
 		ByteString(reply)
 	}
@@ -57,6 +57,7 @@ object ServerController {
 	def checkCredentials(credentials: CredentialsMessage): CheckMessage = {
 		if (users.contains(credentials.getUserName)) {
 			if (credentials.getPassword == users(credentials.getUserName)) {
+				connectedUsers += ((credentials.getId, credentials.getUserName))
 				return CheckMessage(credentials.id, check = true)
 			}
 		}

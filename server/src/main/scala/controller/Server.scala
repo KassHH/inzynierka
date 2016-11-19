@@ -17,7 +17,15 @@ import scala.pickling.json._
 	* Created by kass on 28.10.16.
 	*/
 object Server {
-	val connections = new mutable.LinkedHashMap[Long, ActorRef]()
+	// connections - map of id's of clients and ActorRefs for it's handlers
+	val connectionHandlers = new mutable.HashMap[Long, ActorRef]()
+	val connections = new mutable.HashMap[Long, ActorRef]()
+
+	def getConnectionHandlers: mutable.HashMap[Long, ActorRef] = connectionHandlers
+
+	def getConnections: mutable.HashMap[Long, ActorRef] = connections
+
+	def addToConnections(id: Long, actorRef: ActorRef) = connections += ((id, actorRef))
 }
 
 class Server extends Actor {
@@ -34,11 +42,14 @@ class Server extends Actor {
 		case d: DeadLetter => println(d)
 		case c@Connected(remote, local) =>
 			println("connected with" + c)
+
 			val handler = context.actorOf(Props[SimplisticHandler])
-			Server.connections += ((ServerController.count, handler))
+			Server.connectionHandlers += ((ServerController.count, handler))
+
 			val connection = sender()
 			connection ! Register(handler)
 			connection ! Write(ByteString(ConnectMessage(ServerController.count.toLong).pickle.value))
+
 			ServerController.count += 1
 		//			Server.connections.foreach(_._2 ! "got")
 	}
@@ -50,7 +61,7 @@ class SimplisticHandler extends Actor {
 	import Tcp._
 
 	val replyTo = sender()
-
+	println(sender().path.name)
 	def receive = {
 		case Received(data) =>
 			val stringData = data.decodeString(Charset.defaultCharset())
