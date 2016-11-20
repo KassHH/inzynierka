@@ -8,7 +8,6 @@ import model._
 import model.messaging.requests.CredentialsMessage
 import view.{LoginWindow, MainWindow}
 
-import scala.collection.mutable
 import scalafx.application.{JFXApp, Platform}
 
 /**
@@ -45,14 +44,19 @@ object Controller extends JFXApp {
 					MainWindow.show()
 				}
 				else {
+					//stage.
 					LoginWindow.alertLabel.visible = true
 				}
 			}
 		})
 	}
 
-	def showUsers(users: mutable.HashMap[Long, String]): Unit = {
+	def showUsers(users: Map[Long, String]): Unit = {
 		println(users.aggregate("\n")(_ + _._2, _ + _))
-		MainWindow.receivedText.text = users.aggregate("\n")(_ + _._2, _ + _)
+		//stage
+		MainWindow.receivedText.text = users.aggregate("\n")(_ + _._2, _ + " " + _)
 	}
+
+
+	def startTalk(ids: Set[Long]) = ???
 }

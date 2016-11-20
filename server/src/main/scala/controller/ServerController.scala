@@ -17,8 +17,9 @@ object ServerController {
 	var connectedUsers = new mutable.HashMap[Long, String]()
 	var count = 0
 	var users = new mutable.HashMap[String, String]
-	users += (("user", "pass"))
+	users += (("user", "pass"), ("user2", "123"))
 
+	//	connectedUsers += ((123,"test1"),(321,"test2"))
 	def giveReply(request: String): ByteString = {
 		var reply: String = ""
 		println(request)
@@ -28,8 +29,8 @@ object ServerController {
 				reply = credentialsActionCheck(a).pickle.value
 			case a: CheckMessage => print(a.getCheck)
 			case a: Logged =>
-				val s = AvailableUsers(a.getId, connectedUsers.pickle.value)
-				reply = s.pickle.value
+				val s = connectedUsers.toMap.pickle.value //s.
+				reply = AvailableUsers(a.getId, s).pickle.value
 		}
 		ByteString(reply)
 	}

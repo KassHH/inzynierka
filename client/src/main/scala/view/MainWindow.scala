@@ -2,10 +2,11 @@ package view
 
 import scalafx.Includes._
 import scalafx.application.JFXApp
+import scalafx.collections.ObservableBuffer
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.canvas._
-import scalafx.scene.control.{Button, ButtonBar, TextArea, TextField}
+import scalafx.scene.control._
 import scalafx.scene.layout.GridPane
 import scalafx.scene.paint.Color
 
@@ -56,6 +57,10 @@ object MainWindow extends JFXApp.PrimaryStage {
 			new Button("%")
 		)
 	}
+	val usersList = new ListView[CheckBox]()
+	val usersCheckboxesList = ObservableBuffer[CheckBox]()
+	usersList.items = usersCheckboxesList
+
 	scene = new Scene {
 		root = new GridPane {
 			hgap = 10 //mW.height * 0.1
