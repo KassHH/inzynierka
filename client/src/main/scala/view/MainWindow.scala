@@ -1,12 +1,14 @@
 package view
 
+import controller.Controller
+
 import scalafx.Includes._
 import scalafx.application.JFXApp
-import scalafx.collections.ObservableBuffer
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.canvas._
 import scalafx.scene.control._
+import scalafx.scene.control.cell.CheckBoxListCell
 import scalafx.scene.layout.GridPane
 import scalafx.scene.paint.Color
 
@@ -57,9 +59,11 @@ object MainWindow extends JFXApp.PrimaryStage {
 			new Button("%")
 		)
 	}
-	val usersList = new ListView[CheckBox]()
-	val usersCheckboxesList = ObservableBuffer[CheckBox]()
-	usersList.items = usersCheckboxesList
+	val usersList = new ListView[UserCheck]() {
+		cellFactory = CheckBoxListCell.forListView(_.selected)
+	}
+	/*val usersCheckboxesList = ObservableBuffer[UserCheck]()
+	usersList.items = usersCheckboxesList*/
 
 	scene = new Scene {
 		root = new GridPane {
@@ -76,6 +80,22 @@ object MainWindow extends JFXApp.PrimaryStage {
 			add(writtenText, 1, 1, 1, 1)
 			add(paintingArea, 0, 0, 1, 1)
 			add(receivedText, 1, 0, 1, 1)
+			add(usersList, 2, 0, 1, 1)
+			add(new Button("talk") {
+				onAction = handle {
+					if (Controller.talking) {
+						Controller.startTalk()
+						Controller.talking = true
+						text = "end talk"
+						usersList.visible = false
+					} else {
+						Controller.talking = false
+						text = "talk"
+						usersList.visible = true
+					}
+				}
+
+			}, 2, 1, 1, 1)
 		}
 	}
 }

@@ -1,11 +1,16 @@
 package view
 
-import scalafx.scene.control.CheckBox
+import scalafx.beans.property.BooleanProperty
 
 /**
 	* Created by Katarzyna Herman on 20.11.16.
 	*/
-class UserCheck(id: Long, checkBox: CheckBox) {
-	val check: CheckBox = checkBox
-	val userId: Long = id
+class UserCheck(name: String, id: Long) {
+	val selected = BooleanProperty(false)
+
+	override def toString: String = name
+
+	def getId: Long = id
+
+	def getName: String = name
 }
