@@ -1,7 +1,10 @@
 package view
 
 import controller.Controller
+import model.messaging.requests.TextMessage
 
+import scala.pickling.Defaults._
+import scala.pickling.json._
 import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.geometry.{Insets, Pos}
@@ -11,7 +14,6 @@ import scalafx.scene.control._
 import scalafx.scene.control.cell.CheckBoxListCell
 import scalafx.scene.layout.GridPane
 import scalafx.scene.paint.Color
-
 
 /**
 	* Created by Katarzyna Herman on 08.10.16.
@@ -44,9 +46,12 @@ object MainWindow extends JFXApp.PrimaryStage {
 			new Button("1"),
 			new Button("send") {
 				onAction = handle {
+					if (Controller.talking)
+						Controller.send(
+							TextMessage(Controller.login.id, writtenText.text.value, Controller.talkId)
+								.pickle.value)
 				}
 			}
-
 		)
 	}
 	val writingButtons = new ButtonBar {
@@ -83,7 +88,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 			add(usersList, 2, 0, 1, 1)
 			add(new Button("talk") {
 				onAction = handle {
-					if (Controller.talking) {
+					if (!Controller.talking) {
 						Controller.startTalk()
 						Controller.talking = true
 						text = "end talk"

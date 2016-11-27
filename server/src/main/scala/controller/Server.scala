@@ -1,9 +1,8 @@
 package controller
 
 import java.net.InetSocketAddress
-import java.nio.charset.Charset
 
-import akka.actor.{Actor, ActorRef, DeadLetter, Props}
+import akka.actor.{Actor, ActorRef, ActorSelection, DeadLetter, Props}
 import akka.io.{IO, Tcp}
 import akka.util.ByteString
 import model._
@@ -19,13 +18,7 @@ import scala.pickling.json._
 object Server {
 	// connections - map of id's of clients and ActorRefs for it's handlers
 	val connectionHandlers = new mutable.HashMap[Long, ActorRef]()
-	val connections = new mutable.HashMap[Long, ActorRef]()
-
-	def getConnectionHandlers: mutable.HashMap[Long, ActorRef] = connectionHandlers
-
-	def getConnections: mutable.HashMap[Long, ActorRef] = connections
-
-	def addToConnections(id: Long, actorRef: ActorRef) = connections += ((id, actorRef))
+	val connections = new mutable.HashMap[Long, ActorSelection]()
 }
 
 class Server extends Actor {
@@ -43,10 +36,10 @@ class Server extends Actor {
 		case c@Connected(remote, local) =>
 			println("connected with" + c)
 
-			val handler = context.actorOf(Props[SimplisticHandler])
-			Server.connectionHandlers += ((ServerController.count, handler))
-
+			val handler = context.actorOf(Props[Handler])
 			val connection = sender()
+			Server.connectionHandlers += ((ServerController.count, handler))
+			Server.connections += ((ServerController.count, context.actorSelection(connection.path)))
 			connection ! Register(handler)
 			connection ! Write(ByteString(ConnectMessage(ServerController.count.toLong).pickle.value))
 
@@ -56,20 +49,4 @@ class Server extends Actor {
 
 }
 
-class SimplisticHandler extends Actor {
-
-	import Tcp._
-
-	val replyTo = sender()
-	println(sender().path.name)
-	def receive = {
-		case Received(data) =>
-			val stringData = data.decodeString(Charset.defaultCharset())
-			val byteData = ServerController.giveReply(stringData)
-			sender() ! Write(byteData)
-		case d: DeadLetter => println(d)
-		case PeerClosed => context stop self
-		case _ => println("tu! ")
-	}
-}
 

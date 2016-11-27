@@ -5,10 +5,12 @@ import java.net.InetSocketAddress
 import akka.actor._
 import akka.util.ByteString
 import model._
-import model.messaging.requests.CredentialsMessage
+import model.messaging.requests.{CredentialsMessage, TalkIds, TextMessage}
+import model.messaging.response.TalkMessage
 import view.{LoginWindow, MainWindow, UserCheck}
 
-import scala.collection.immutable.HashMap
+import scala.pickling.Defaults._
+import scala.pickling.json._
 import scalafx.application.{JFXApp, Platform}
 import scalafx.collections.ObservableBuffer
 
@@ -23,11 +25,12 @@ object Controller extends JFXApp {
 	val system = ActorSystem("mySystem")
 	val listener = system.actorOf(Listner.props(), "handler")
 	val connectionActor = system.actorOf(Client.props(remote, listener), "client")
-	var talkingWith = new HashMap[String, Long]
+	var talkingWith: Map[Long, String] = _
 	var login: CredentialsMessage = _
 	var id: Long = _
 	var usersCheckboxesList: ObservableBuffer[UserCheck] = _
 	var talking: Boolean = false
+	var talkId: Long = _
 
 	override def stopApp(): Unit = {
 		super.stopApp()
@@ -61,11 +64,25 @@ object Controller extends JFXApp {
 	}
 
 	def startTalk() = {
-		val id = usersCheckboxesList.map(d => if (d.selected.value) d.getId).toSet
-		send("ids")
+		val ids: Set[Long] = usersCheckboxesList.filter(d => d.selected.value).map(d => d.getId).toSet
+		talkingWith = usersCheckboxesList.filter(d => d.selected.value).map(d => (d.getId, d.getName)).toMap
+		val a = TalkIds(login.getId, ids.pickle.value)
+		send(a.pickle.value)
 	}
 
 	def send(msg: String) = {
 		connectionActor.tell(ByteString(msg), listener)
+	}
+
+	def showText(tM: TextMessage) = {
+		val textBuffer = MainWindow.receivedText.text.value
+		MainWindow.receivedText.text = textBuffer + tM.id + ": " + tM.text + "\n"
+	}
+
+	def beginTalk(a: TalkMessage): Unit = {
+		Controller.talking = true
+		//todo with who you talk?
+		Controller.talkId = a.id
+		MainWindow.usersList.visible = false
 	}
 }
