@@ -22,13 +22,13 @@ object MainWindow extends JFXApp.PrimaryStage {
 	val mW = this
 	height = 480
 	width = 640
-	val receivedText = new TextArea("otrzymane wiadomości") {
+	val receivedText = new TextArea("") {
 		editable = false
 		prefHeight <== (mW.height - 10) * 0.6
 		prefWidth <== (mW.width - 10) * 0.6
 	}
 	val writtenText = new TextField {
-		text = "tu będzie później tekst"
+		text = ""
 		prefHeight <== (mW.height - 10) * 0.35
 		prefWidth <== (mW.width - 10) * 0.6
 		alignment = Pos.BottomLeft
@@ -50,6 +50,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 						Controller.send(
 							TextMessage(Controller.login.id, writtenText.text.value, Controller.talkId)
 								.pickle.value)
+					writtenText.text = ""
 				}
 			}
 		)

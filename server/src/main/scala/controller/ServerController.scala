@@ -19,7 +19,7 @@ object ServerController {
 	var talkCount = 0
 	var count = 0
 	var users = new mutable.HashMap[String, String]
-	users += (("user", "pass"), ("user2", "123"))
+	users += (("user", "pass"), ("user2", "123"), ("user3", "pass"), ("user4", "pass"))
 
 	//	connectedUsers += ((123,"test1"),(321,"test2"))
 	def giveReply(request: String): ByteString = {
@@ -27,10 +27,9 @@ object ServerController {
 		println(request)
 		request.unpickle[Message] match {
 			case a: TextMessage =>
-				val tlk = //talks(a.talkId).collect
-					(Server.connections)
+				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
 				reply = a.pickle.value
-				tlk.foreach(c => Server.connectionHandlers(c._1).tell(a, Server.connectionHandlers(a.id)))
+				tlk.foreach(c => c.tell(a, Server.connectionHandlers(a.id)))
 
 			case a: CredentialsMessage =>
 				reply = credentialsActionCheck(a).pickle.value
@@ -39,12 +38,11 @@ object ServerController {
 				val s = connectedUsers.toMap.pickle.value //s.
 				reply = AvailableUsers(a.getId, s).pickle.value
 			case a: TalkIds =>
-				val b = //a.getSet.collect
-					(Server.connections)
+				val b = a.getSet.collect(Server.connectionHandlers)
 				talks += ((talkCount, a.getSet))
 				val s = TalkMessage(talkCount, a.ids)
 				reply = s.pickle.value
-				b.foreach(c => Server.connectionHandlers(c._1).tell(s, Server.connectionHandlers(a.id)))
+				b.foreach(c => c.tell(s, Server.connectionHandlers(a.id)))
 				talkCount += 1
 		}
 		ByteString(reply)
