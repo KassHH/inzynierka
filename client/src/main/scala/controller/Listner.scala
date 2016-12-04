@@ -18,11 +18,10 @@ import scala.pickling.json._
 object Listner {
 	def props(): Props = Props(new Listner())
 }
-
 class Listner extends Actor {
 	override def receive = {
 		case x: ByteString =>
-			println(x.decodeString(Charset.defaultCharset()))
+			//	println(x.decodeString(Charset.defaultCharset()))
 			x.decodeString(Charset.defaultCharset()).unpickle[Message] match {
 				case a: TextMessage => Controller.showText(a)
 				case a: CheckMessage => {
@@ -32,14 +31,10 @@ class Listner extends Actor {
 				case a: ConnectMessage => Controller.id = a.id
 				case a: AvailableUsers => Controller.showUsers(a.getUsers)
 				case a: TalkMessage => Controller.beginTalk(a)
-
 				case b: Any => println("another error (no such Send type) " + b.toString)
 			}
-		//			sender() ! 1
 		case x: String => println("dostałem Stringa" + x)
-
 		case c@Connected(remote, local) => println("ok! Connected!")
 		case b: Any => println("some error(massage not a string) " + b.toString)
-
-	} //: Receive = ???
+	}
 }

@@ -45,9 +45,7 @@ object Controller extends JFXApp {
 			override def run(): Unit = {
 				if (check) {
 					MainWindow.show()
-				}
-				else {
-					//stage.
+				} else {
 					LoginWindow.alertLabel.visible = true
 				}
 			}
@@ -56,11 +54,7 @@ object Controller extends JFXApp {
 
 	def showUsers(users: Map[Long, String]): Unit = {
 		usersCheckboxesList = ObservableBuffer[UserCheck](users map { case (id, name) => new UserCheck(name = name, id = id) } toBuffer).filter(a => a.getId != id)
-		//val usersCheckboxesList = ObservableBuffer[CheckBox](users map { case (id, name) => new CheckBox(name) } toSeq)
 		MainWindow.usersList.items = usersCheckboxesList
-
-		//stage
-		//MainWindow.receivedText.text = users.aggregate("\n")(_ + _._2, _ + " " + _)
 	}
 
 	def startTalk() = {
