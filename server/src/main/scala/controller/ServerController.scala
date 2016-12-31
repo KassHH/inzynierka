@@ -2,7 +2,7 @@ package controller
 
 import akka.util.ByteString
 import model.messaging.Message
-import model.messaging.requests.{CredentialsMessage, Logged, TalkIds, TextMessage}
+import model.messaging.requests._
 import model.messaging.response.{AvailableUsers, CheckMessage, TalkMessage}
 
 import scala.collection.mutable
@@ -30,9 +30,31 @@ object ServerController {
 				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
 				reply = a.pickle.value
 				tlk.foreach(c => c.tell(a, Server.connectionHandlers(a.id)))
+			case a: PaintingMessage =>
+				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
+				reply = a.pickle.value
+				tlk.foreach(c => c.tell(a, Server.connectionHandlers(a.id)))
 
-			case a: CredentialsMessage =>
-				reply = credentialsActionCheck(a).pickle.value
+			case CredentialsMessage(id, username, password, "LOGIN") =>
+				reply = checkCredentials(password, id, username).pickle.value
+			case CredentialsMessage(id, username, password, "DELETE") =>
+				users -= username
+				reply = CheckMessage(id, check = true, "DELETE").pickle.value
+			case CredentialsMessage(id, username, password, "PASS_CHANGE") =>
+				if (users.contains(username)) {
+					users.update(username, password)
+					reply = CheckMessage(id, check = true, "PASS_CHANGE").pickle.value
+				} else {
+					reply = CheckMessage(id, check = false, "PASS_CHANGE").pickle.value
+				}
+			case CredentialsMessage(id, username, password, "REGISTER") =>
+				if (!users.contains(username)) {
+					users += ((username, password))
+					reply = CheckMessage(id, check = true, "REGISTER").pickle.value
+				} else {
+					reply = CheckMessage(id, check = false, "REGISTER").pickle.value
+				}
+
 			case a: CheckMessage => print(a.check)
 			case a: Logged =>
 				val s = connectedUsers.toMap.pickle.value //s.
@@ -48,33 +70,35 @@ object ServerController {
 		ByteString(reply)
 	}
 
-	def credentialsActionCheck(c: CredentialsMessage): CheckMessage = {
-		c.action match {
-			case "LOGIN" => checkCredentials(c)
-			case "PASS_CHANGE" => if (users.contains(c.username)) {
-				users.update(c.username, c.password)
-			} else {
-				return CheckMessage(c.id, check = false)
+	/*
+		def credentialsActionCheck(c: CredentialsMessage): CheckMessage = {
+			c.action match {
+				case "LOGIN" =>
+				case "PASS_CHANGE" => if (users.contains(c.username)) {
+					users.update(c.username, c.password)
+				} else {
+					return CheckMessage(c.id, check = false)
+				}
+				case "DELETE" => users -= c.username
+				case "REGISTER" => if (!users.contains(c.username)) {
+					users += ((c.username, c.password))
+				} else {
+					return CheckMessage(c.id, check = false)
+				}
+				case _ => return CheckMessage(c.id, check = false)
 			}
-			case "DELETE" => users -= c.username
-			case "REGISTER" => if (!users.contains(c.username)) {
-				users += ((c.username, c.password))
-			} else {
-				return CheckMessage(c.id, check = false)
-			}
-			case _ => return CheckMessage(c.id, check = false)
-		}
 
-		CheckMessage(c.id, check = true)
-	}
+			CheckMessage(c.id, check = true)
+		}
+	*/
 
-	def checkCredentials(credentials: CredentialsMessage): CheckMessage = {
-		if (users.contains(credentials.username)) {
-			if (credentials.password == users(credentials.username)) {
-				connectedUsers += ((credentials.id, credentials.username))
-				return CheckMessage(credentials.id, check = true)
+	def checkCredentials(password: String, id: Long, username: String): CheckMessage = {
+		if (users.contains(username)) {
+			if (password == users(username)) {
+				connectedUsers += ((id, username))
+				return CheckMessage(id, check = true, "LOGIN")
 			}
 		}
-		CheckMessage(credentials.id, check = false)
+		CheckMessage(id, check = false, "LOGIN")
 	}
 }

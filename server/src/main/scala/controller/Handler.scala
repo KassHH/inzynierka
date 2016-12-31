@@ -5,7 +5,7 @@ import java.nio.charset.Charset
 import akka.actor.{Actor, ActorRef, DeadLetter}
 import akka.io.Tcp
 import akka.util.ByteString
-import model.messaging.requests.TextMessage
+import model.messaging.requests.{PaintingMessage, TextMessage}
 import model.messaging.response.TalkMessage
 
 import scala.pickling.Defaults._
@@ -32,6 +32,8 @@ class Handler extends Actor {
 			sender() ! Write(byteData)
 		case d: DeadLetter => println(d)
 		case a: TextMessage =>
+			myActor ! Write(ByteString(a.pickle.value))
+		case a: PaintingMessage =>
 			myActor ! Write(ByteString(a.pickle.value))
 		case a: TalkMessage =>
 			myActor ! Write(ByteString(a.pickle.value))

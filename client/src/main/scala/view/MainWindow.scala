@@ -2,8 +2,8 @@ package view
 
 import javax.imageio.ImageIO
 
-import controller.Controller
-import model.messaging.requests.TextMessage
+import controller.{Controller, PaintingController}
+import model.messaging.requests.{PaintingMessage, TextMessage}
 
 import scala.pickling.Defaults._
 import scala.pickling.json._
@@ -47,7 +47,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 		width <== stack.width
 
 	}
-	val gc = paintingArea.graphicsContext2D
+	PaintingController.gc = paintingArea.graphicsContext2D
 	stack.background = new Background(Array(new BackgroundFill(Color.White, CornerRadii.Empty, Insets.Empty)))
 	stack.children.add(paintingArea)
 	val paintingButtons = new ButtonBar {
@@ -84,7 +84,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 						println(file.getAbsolutePath)
 						try {
 							image = new Image("file:" + file.getAbsolutePath)
-							gc.drawImage(image, paintingArea.layoutX.value,
+							PaintingController.gc.drawImage(image, paintingArea.layoutX.value,
 								paintingArea.layoutY.value, paintingArea.width.value,
 								paintingArea.height.value)
 						}
@@ -93,8 +93,8 @@ object MainWindow extends JFXApp.PrimaryStage {
 			},
 			new Button("clean") {
 				onAction = handle {
-					gc.setFill(Color.White)
-					gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
+					PaintingController.gc.setFill(Color.White)
+					PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 				}
 			},
 			new Button("send") {
@@ -110,25 +110,24 @@ object MainWindow extends JFXApp.PrimaryStage {
 	}
 
 	paintingArea.onMousePressed = (me: MouseEvent) => {
-		gc.beginPath()
-		gc.stroke = Color.Blue
-		gc.fill = Color.Red
-		//	println("I've started")
-		gc.moveTo(me.sceneX - 10, me.sceneY - 10)
+		PaintingController.gc.beginPath()
+		PaintingController.gc.stroke = PaintingController.stroke
+		PaintingController.gc.fill = PaintingController.fill
+		PaintingController.gc.moveTo(me.sceneX - 10, me.sceneY - 10)
+		PaintingController.points += ((me.sceneX - 10, me.sceneY - 10))
 	}
 
 	paintingArea.onMouseDragged = (me: MouseEvent) => {
-		//	val x = me.sceneX
-		//	val y = me.sceneY
-		//	me.x
-		gc.lineTo(me.x, me.y)
-		//	println("mouse is over Point(x: " + x + ",y: "+ y +")")
-		//	me.consume()
+		PaintingController.gc.lineTo(me.x, me.y)
+		PaintingController.points += ((me.x, me.y))
 	}
 	paintingArea.onMouseReleased = (me: MouseEvent) => {
-		//	gc.closePath()
-		gc.strokePath()
-		//	println("end point: Point(" + me.sceneX + ", " + me.sceneY + ")")
+		PaintingController.gc.strokePath()
+		val color: Color = PaintingController.stroke
+		Controller.send(PaintingMessage(
+			Controller.id, Controller.talkId,
+			PaintingController.points.toList.pickle.value,
+			color.red, color.green, color.blue).pickle.value)
 	}
 	val writingButtons = new ButtonBar {
 		buttons = List(
@@ -138,8 +137,8 @@ object MainWindow extends JFXApp.PrimaryStage {
 			new Button("A"),
 			new Button("clean") {
 				onAction = handle {
-					gc.setFill(Color.White)
-					gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
+					PaintingController.gc.setFill(Color.White)
+					PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 				}
 			},
 			new Button("%")
@@ -160,9 +159,9 @@ object MainWindow extends JFXApp.PrimaryStage {
 			//			alignment = Pos.Center
 			writingButtons.setMaxWidth((mW.getWidth - 10) * 0.4)
 			writingButtons.setMaxHeight((mW.getHeight - 30) * 0.25)
-			val gc = paintingArea.getGraphicsContext2D
-			gc.setFill(Color.White)
-			gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
+			//val gc = paintingArea.getGraphicsContext2D
+			PaintingController.gc.setFill(Color.White)
+			PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 			add(paintingButtons, 0, 1, 1, 1)
 			add(writtenText, 1, 1, 1, 1)
 			add(stack, 0, 0, 1, 1)
