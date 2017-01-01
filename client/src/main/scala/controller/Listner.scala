@@ -7,7 +7,7 @@ import akka.io.Tcp.Connected
 import akka.util.ByteString
 import model.messaging.Message
 import model.messaging.requests.{Logged, PaintingMessage, TextMessage}
-import model.messaging.response.{AvailableUsers, CheckMessage, ConnectMessage, TalkMessage}
+import model.messaging.response._
 
 import scala.pickling.Defaults._
 import scala.pickling.json._
@@ -32,6 +32,7 @@ class Listner extends Actor {
 				case a: ConnectMessage => Controller.id = a.id
 				case a: AvailableUsers => Controller.showUsers(a.getUsers)
 				case a: TalkMessage => Controller.beginTalk(a)
+				case a: OkMessage => //
 				case b: Any => println("another error (no such Send type) " + b.toString)
 			}
 		case x: String => println("dostałem Stringa" + x)

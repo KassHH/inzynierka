@@ -114,6 +114,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 		PaintingController.gc.stroke = PaintingController.stroke
 		PaintingController.gc.fill = PaintingController.fill
 		PaintingController.gc.moveTo(me.sceneX - 10, me.sceneY - 10)
+		PaintingController.points.clear()
 		PaintingController.points += ((me.sceneX - 10, me.sceneY - 10))
 	}
 

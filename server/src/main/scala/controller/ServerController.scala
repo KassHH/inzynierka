@@ -3,7 +3,7 @@ package controller
 import akka.util.ByteString
 import model.messaging.Message
 import model.messaging.requests._
-import model.messaging.response.{AvailableUsers, CheckMessage, TalkMessage}
+import model.messaging.response.{AvailableUsers, CheckMessage, OkMessage, TalkMessage}
 
 import scala.collection.mutable
 import scala.pickling.Defaults._
@@ -28,11 +28,11 @@ object ServerController {
 		request.unpickle[Message] match {
 			case a: TextMessage =>
 				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
-				reply = a.pickle.value
+				reply = OkMessage(a.id).pickle.value
 				tlk.foreach(c => c.tell(a, Server.connectionHandlers(a.id)))
 			case a: PaintingMessage =>
 				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
-				reply = a.pickle.value
+				reply = OkMessage(a.id).pickle.value
 				tlk.foreach(c => c.tell(a, Server.connectionHandlers(a.id)))
 
 			case CredentialsMessage(id, username, password, "LOGIN") =>
@@ -61,7 +61,9 @@ object ServerController {
 				reply = AvailableUsers(a.getId, s).pickle.value
 			case a: TalkIds =>
 				val b = a.getSet.collect(Server.connectionHandlers)
-				talks += ((talkCount, a.getSet))
+				val set: mutable.HashSet[Long] = mutable.HashSet() ++ a.getSet
+				set += a.id
+				talks += ((talkCount, set.toSet))
 				val s = TalkMessage(talkCount, a.ids)
 				reply = s.pickle.value
 				b.foreach(c => c.tell(s, Server.connectionHandlers(a.id)))
@@ -69,28 +71,6 @@ object ServerController {
 		}
 		ByteString(reply)
 	}
-
-	/*
-		def credentialsActionCheck(c: CredentialsMessage): CheckMessage = {
-			c.action match {
-				case "LOGIN" =>
-				case "PASS_CHANGE" => if (users.contains(c.username)) {
-					users.update(c.username, c.password)
-				} else {
-					return CheckMessage(c.id, check = false)
-				}
-				case "DELETE" => users -= c.username
-				case "REGISTER" => if (!users.contains(c.username)) {
-					users += ((c.username, c.password))
-				} else {
-					return CheckMessage(c.id, check = false)
-				}
-				case _ => return CheckMessage(c.id, check = false)
-			}
-
-			CheckMessage(c.id, check = true)
-		}
-	*/
 
 	def checkCredentials(password: String, id: Long, username: String): CheckMessage = {
 		if (users.contains(username)) {
