@@ -82,12 +82,12 @@ object MainWindow extends JFXApp.PrimaryStage {
 					val file = chooser.showOpenDialog(null)
 					if (file != null) {
 						println(file.getAbsolutePath)
-						try {
-							image = new Image("file:" + file.getAbsolutePath)
+
+						image = new Image("file:" + file.getAbsolutePath)
 							PaintingController.gc.drawImage(image, paintingArea.layoutX.value,
 								paintingArea.layoutY.value, paintingArea.width.value,
 								paintingArea.height.value)
-						}
+
 					}
 				}
 			},
