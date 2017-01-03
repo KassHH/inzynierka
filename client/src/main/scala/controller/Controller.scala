@@ -5,7 +5,7 @@ import java.net.InetSocketAddress
 import akka.actor._
 import akka.util.ByteString
 import model._
-import model.messaging.requests.{CredentialsMessage, TalkIds, TextMessage}
+import model.messaging.requests.{CredentialsMessage, TalkIdsMessage, TextMessage}
 import model.messaging.response.TalkMessage
 import view.{LoginWindow, MainWindow, UserCheck}
 
@@ -60,7 +60,7 @@ object Controller extends JFXApp {
 	def startTalk() = {
 		val ids: Set[Long] = usersCheckboxesList.filter(d => d.selected.value).map(d => d.getId).toSet
 		talkingWith = usersCheckboxesList.filter(d => d.selected.value).map(d => (d.getId, d.getName)).toMap
-		val a = TalkIds(login.getId, ids.pickle.value)
+		val a = TalkIdsMessage(login.getId, ids.pickle.value)
 		send(a.pickle.value)
 	}
 

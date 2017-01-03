@@ -93,7 +93,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 			},
 			new Button("clean") {
 				onAction = handle {
-					PaintingController.gc.setFill(Color.White)
+					PaintingController.gc.fill = Color.White
 					PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 				}
 			},
@@ -161,7 +161,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 			writingButtons.setMaxWidth((mW.getWidth - 10) * 0.4)
 			writingButtons.setMaxHeight((mW.getHeight - 30) * 0.25)
 			//val gc = paintingArea.getGraphicsContext2D
-			PaintingController.gc.setFill(Color.White)
+			PaintingController.gc.fill = Color.White
 			PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 			add(paintingButtons, 0, 1, 1, 1)
 			add(writtenText, 1, 1, 1, 1)

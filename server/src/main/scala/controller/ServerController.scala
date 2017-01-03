@@ -56,10 +56,10 @@ object ServerController {
 				}
 
 			case a: CheckMessage => print(a.check)
-			case a: Logged =>
+			case a: LoggedMessage =>
 				val s = connectedUsers.toMap.pickle.value //s.
 				reply = AvailableUsers(a.getId, s).pickle.value
-			case a: TalkIds =>
+			case a: TalkIdsMessage =>
 				val b = a.getSet.collect(Server.connectionHandlers)
 				val set: mutable.HashSet[Long] = mutable.HashSet() ++ a.getSet
 				set += a.id

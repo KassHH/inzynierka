@@ -6,7 +6,7 @@ import akka.actor.{Actor, Props}
 import akka.io.Tcp.Connected
 import akka.util.ByteString
 import model.messaging.Message
-import model.messaging.requests.{Logged, PaintingMessage, TextMessage}
+import model.messaging.requests.{LoggedMessage, PaintingMessage, TextMessage}
 import model.messaging.response._
 
 import scala.pickling.Defaults._
@@ -27,7 +27,7 @@ class Listner extends Actor {
 				case a: PaintingMessage => PaintingController.paintMessage(a)
 				case a: CheckMessage => {
 					Controller.changeScreen(a.check)
-					sender() ! ByteString(Logged(a.id).pickle.value)
+					sender() ! ByteString(LoggedMessage(a.id).pickle.value)
 				}
 				case a: ConnectMessage => Controller.id = a.id
 				case a: AvailableUsers => Controller.showUsers(a.getUsers)

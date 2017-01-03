@@ -8,6 +8,6 @@ import scala.pickling.json._
 /**
 	* Created by Katarzyna Herman on 30.10.16.
 	*/
-case class TalkIds(override val id: Long, ids: String) extends Message {
+case class TalkIdsMessage(override val id: Long, ids: String) extends Message {
 	def getSet: Set[Long] = ids.unpickle[Set[Long]]
 }
