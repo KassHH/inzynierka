@@ -26,7 +26,7 @@ class Server extends Actor {
 	import Tcp._
 	import context.system
 
-	IO(Tcp) ! Bind(self, new InetSocketAddress("localhost", Properities.PORT))
+	IO(Tcp) ! Bind(self, new InetSocketAddress(Properities.PATH, Properities.PORT))
 
 	def receive = {
 		case b@Bound(localAddress) =>
