@@ -21,7 +21,7 @@ object Controller extends JFXApp {
 
 
 	stage = LoginWindow
-	val remote = new InetSocketAddress(Properities.PATH, Properities.PORT)
+	val remote = new InetSocketAddress(Properties.PATH, Properties.PORT)
 	val system = ActorSystem("mySystem")
 	val listener = system.actorOf(Listner.props(), "handler")
 	val connectionActor = system.actorOf(Client.props(remote, listener), "client")

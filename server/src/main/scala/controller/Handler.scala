@@ -27,7 +27,6 @@ class Handler extends Actor {
 		case Received(data) =>
 			myActor = sender()
 			val stringData = data.decodeString(Charset.defaultCharset())
-			println(sender() + " ||| " + sender().path)
 			val byteData = ServerController.giveReply(stringData)
 			sender() ! Write(byteData)
 		case d: DeadLetter => println(d)
