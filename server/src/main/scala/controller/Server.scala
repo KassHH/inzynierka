@@ -39,7 +39,7 @@ class Server extends Actor {
 			val handler = context.actorOf(Props[Handler])
 			val connection = sender()
 			Server.connectionHandlers += ((ServerController.count, handler))
-			Server.connections += ((ServerController.count, context.actorSelection(connection.path)))
+			//Server.connections += ((ServerController.count, context.actorSelection(connection.path)))
 			connection ! Register(handler)
 			connection ! Write(ByteString(ConnectMessage(ServerController.count.toLong).pickle.value))
 
