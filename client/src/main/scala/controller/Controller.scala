@@ -53,9 +53,13 @@ object Controller extends JFXApp {
 	}
 
 	def showUsers(users: Map[Long, String]): Unit = {
-		usersCheckboxesList.removeAll(usersCheckboxesList)
-		usersCheckboxesList = ObservableBuffer[UserCheck](users map { case (id, name) => new UserCheck(name = name, id = id) } toBuffer).filter(a => a.getId != id)
-		MainWindow.usersList.items = usersCheckboxesList
+		Platform.runLater(new Runnable {
+			override def run(): Unit = {
+				usersCheckboxesList.removeAll(usersCheckboxesList)
+				usersCheckboxesList = ObservableBuffer[UserCheck](users map { case (id, name) => new UserCheck(name = name, id = id) } toBuffer).filter(a => a.getId != id)
+				MainWindow.usersList.items = usersCheckboxesList
+			}
+		})
 	}
 
 	def startTalk() = {

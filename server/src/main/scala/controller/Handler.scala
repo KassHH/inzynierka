@@ -41,7 +41,8 @@ class Handler extends Actor {
 			ServerController.connectedUsers -= id
 			context stop self
 		case a: AvailableUsers =>
-			myActor ! Write(ByteString(a.pickle.value))
+			val b = AvailableUsers(a.id, a.users).pickle.value
+			myActor ! Write(ByteString(b))
 		case a: model.messaging.Message =>
 			myActor ! Write(ByteString(a.pickle.value))
 		case a: ByteString => println("tu! " + a.decodeString(Charset.defaultCharset()))

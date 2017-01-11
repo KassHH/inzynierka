@@ -22,12 +22,16 @@ class Listner extends Actor {
 	override def receive = {
 		case x: ByteString =>
 			//	println(x.decodeString(Charset.defaultCharset()))
-			x.decodeString(Charset.defaultCharset()).unpickle[Message] match {
+			val tmp = x.decodeString(Charset.defaultCharset())
+
+			tmp.unpickle[Message] match {
 				case a: TextMessage => Controller.showText(a)
 				case a: PaintingMessage => PaintingController.paintMessage(a)
 				case a: CheckMessage => {
 					Controller.changeScreen(a.check)
+					if (a.check) {
 					sender() ! ByteString(LoggedMessage(a.id).pickle.value)
+					}
 				}
 				case a: ConnectMessage => Controller.id = a.id
 				case a: AvailableUsers => Controller.showUsers(a.getUsers)

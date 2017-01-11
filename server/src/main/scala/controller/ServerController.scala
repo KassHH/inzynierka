@@ -13,6 +13,10 @@ import scala.pickling.json._
 	* Created by kass on 04.11.16.
 	*/
 object ServerController {
+	/*	def saveRegistered() = {
+			val output = new File("registeredUser")
+		}*/
+
 
 	var connectedUsers = new mutable.HashMap[Long, String]()
 	var talks = new mutable.HashMap[Long, Set[Long]]
@@ -50,6 +54,7 @@ object ServerController {
 			case CredentialsMessage(id, username, password, "REGISTER") =>
 				if (!users.contains(username)) {
 					users += ((username, password))
+					//					ServerController.saveRegistered()
 					reply = CheckMessage(id, check = true, "REGISTER").pickle.value
 				} else {
 					reply = CheckMessage(id, check = false, "REGISTER").pickle.value
@@ -62,7 +67,8 @@ object ServerController {
 				val rep = AvailableUsers(a.getId, b)
 				reply = rep.pickle.value
 				val tlk = s.collect(Server.connectionHandlers)
-				tlk.foreach(c => c.tell(rep, Server.connectionHandlers(a.id)))
+				val tmp = tlk.-(Server.connectionHandlers(a.id))
+				tmp.foreach(c => c.tell(rep, Server.connectionHandlers(a.id)))
 
 			case a: TalkIdsMessage =>
 				val b = a.getSet.collect(Server.connectionHandlers)
