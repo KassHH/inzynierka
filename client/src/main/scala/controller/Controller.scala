@@ -28,7 +28,7 @@ object Controller extends JFXApp {
 	var talkingWith: Map[Long, String] = _
 	var login: CredentialsMessage = _
 	var id: Long = _
-	var usersCheckboxesList: ObservableBuffer[UserCheck] = _
+	var usersCheckboxesList: ObservableBuffer[UserCheck] = new ObservableBuffer[UserCheck]()
 	var talking: Boolean = false
 	var talkId: Long = _
 
@@ -53,8 +53,13 @@ object Controller extends JFXApp {
 	}
 
 	def showUsers(users: Map[Long, String]): Unit = {
-		usersCheckboxesList = ObservableBuffer[UserCheck](users map { case (id, name) => new UserCheck(name = name, id = id) } toBuffer).filter(a => a.getId != id)
-		MainWindow.usersList.items = usersCheckboxesList
+		Platform.runLater(new Runnable {
+			override def run(): Unit = {
+				usersCheckboxesList.removeAll(usersCheckboxesList)
+				usersCheckboxesList = ObservableBuffer[UserCheck](users map { case (id, name) => new UserCheck(name = name, id = id) } toBuffer).filter(a => a.getId != id)
+				MainWindow.usersList.items = usersCheckboxesList
+			}
+		})
 	}
 
 	def startTalk() = {
