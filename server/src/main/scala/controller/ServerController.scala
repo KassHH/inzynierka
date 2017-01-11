@@ -1,11 +1,14 @@
 package controller
 
+import java.io.{BufferedWriter, File, FileWriter}
+
 import akka.util.ByteString
 import model.messaging.Message
 import model.messaging.requests._
 import model.messaging.response.{AvailableUsers, CheckMessage, OkMessage, TalkMessage}
 
 import scala.collection.mutable
+import scala.io.Source
 import scala.pickling.Defaults._
 import scala.pickling.json._
 
@@ -13,17 +16,12 @@ import scala.pickling.json._
 	* Created by kass on 04.11.16.
 	*/
 object ServerController {
-	/*	def saveRegistered() = {
-			val output = new File("registeredUser")
-		}*/
-
-
+	val filename = "registeredUsers.txt"
 	var connectedUsers = new mutable.HashMap[Long, String]()
 	var talks = new mutable.HashMap[Long, Set[Long]]
 	var talkCount = 0
 	var count = 0
 	var users = new mutable.HashMap[String, String]
-	users += (("user", "pass"), ("user2", "123"), ("user3", "pass"), ("user4", "pass"))
 
 	//	connectedUsers += ((123,"test1"),(321,"test2"))
 	def giveReply(request: String): ByteString = {
@@ -54,7 +52,7 @@ object ServerController {
 			case CredentialsMessage(id, username, password, "REGISTER") =>
 				if (!users.contains(username)) {
 					users += ((username, password))
-					//					ServerController.saveRegistered()
+					ServerController.saveRegistered()
 					reply = CheckMessage(id, check = true, "REGISTER").pickle.value
 				} else {
 					reply = CheckMessage(id, check = false, "REGISTER").pickle.value
@@ -81,6 +79,25 @@ object ServerController {
 				talkCount += 1
 		}
 		ByteString(reply)
+	}
+
+	if (new File(filename).exists()) {
+		val fileContents = Source.fromFile(filename).getLines().mkString
+		val registeredUsers = fileContents.unpickle[Map[String, String]]
+		users ++= registeredUsers
+	} else {
+		users += (("user", "pass"), ("user2", "123"), ("user3", "pass"), ("user4", "pass"))
+	}
+
+	def saveRegistered() = {
+		val output = new File(filename)
+		if (output.exists()) {
+			output.delete()
+		}
+		output.createNewFile()
+		val bw = new BufferedWriter(new FileWriter(output))
+		bw.write(users.toMap.pickle.value)
+		bw.close()
 	}
 
 	def checkCredentials(password: String, id: Long, username: String): CheckMessage = {
