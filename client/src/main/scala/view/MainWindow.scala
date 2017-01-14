@@ -37,7 +37,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 	}
 	val writtenText = new TextField {
 		text = ""
-		prefHeight <== (mW.height - 10) * 0.35
+		prefHeight <== (mW.height - 10) * 0.3
 		prefWidth <== (mW.width - 10) * 0.6
 		alignment = Pos.BottomLeft
 	}
@@ -45,11 +45,12 @@ object MainWindow extends JFXApp.PrimaryStage {
 	val paintingArea = new Canvas() {
 		height <== stack.height
 		width <== stack.width
-
 	}
+
 	PaintingController.gc = paintingArea.graphicsContext2D
 	stack.background = new Background(Array(new BackgroundFill(Color.White, CornerRadii.Empty, Insets.Empty)))
 	stack.children.add(paintingArea)
+
 	val paintingButtons = new ButtonBar {
 		buttons = List(
 			new Button {
@@ -63,9 +64,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 						new ExtensionFilter("GIF files (*.gif)", "*.GIF"))
 					val file = chooser.showSaveDialog(null)
 
-					//file.createNewFile()
 					val extension = file.getName.split('.')(1)
-					println(extension)
 					val a = new WritableImage(paintingArea.width.value.toInt, paintingArea.height.value.toInt)
 					paintingArea.snapshot(null, a)
 					ImageIO.write(SwingFXUtils.fromFXImage(a, null), extension, file)
@@ -81,13 +80,10 @@ object MainWindow extends JFXApp.PrimaryStage {
 						new ExtensionFilter("GIF files (*.gif)", "*.GIF"))
 					val file = chooser.showOpenDialog(null)
 					if (file != null) {
-						println(file.getAbsolutePath)
-
 						image = new Image("file:" + file.getAbsolutePath)
-							PaintingController.gc.drawImage(image, paintingArea.layoutX.value,
-								paintingArea.layoutY.value, paintingArea.width.value,
-								paintingArea.height.value)
-
+						PaintingController.gc.drawImage(image, paintingArea.layoutX.value,
+							paintingArea.layoutY.value, paintingArea.width.value,
+							paintingArea.height.value)
 					}
 				}
 			},
@@ -97,7 +93,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 					PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 				}
 			},
-			new Button("send") {
+			new Button("send\ntext") {
 				onAction = handle {
 					if (Controller.talking)
 						Controller.send(
@@ -109,6 +105,7 @@ object MainWindow extends JFXApp.PrimaryStage {
 		)
 	}
 
+	//eventy do malowania
 	paintingArea.onMousePressed = (me: MouseEvent) => {
 		PaintingController.gc.beginPath()
 		PaintingController.gc.stroke = PaintingController.stroke
@@ -117,7 +114,6 @@ object MainWindow extends JFXApp.PrimaryStage {
 		PaintingController.points.clear()
 		PaintingController.points += ((me.sceneX - 10, me.sceneY - 10))
 	}
-
 	paintingArea.onMouseDragged = (me: MouseEvent) => {
 		PaintingController.gc.lineTo(me.x, me.y)
 		PaintingController.points += ((me.x, me.y))
@@ -125,44 +121,26 @@ object MainWindow extends JFXApp.PrimaryStage {
 	paintingArea.onMouseReleased = (me: MouseEvent) => {
 		PaintingController.gc.strokePath()
 		val color: Color = PaintingController.stroke
+		if (Controller.talking) {
 		Controller.send(PaintingMessage(
 			Controller.id, Controller.talkId,
 			PaintingController.points.toList.pickle.value,
 			color.red, color.green, color.blue).pickle.value)
 	}
-	val writingButtons = new ButtonBar {
-		buttons = List(
-			new Button {
-				text = ":)"
-			},
-			new Button("A"),
-			new Button("clean") {
-				onAction = handle {
-					PaintingController.gc.setFill(Color.White)
-					PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
-				}
-			},
-			new Button("%")
-		)
 	}
+
 	val usersList = new ListView[UserCheck]() {
 		cellFactory = CheckBoxListCell.forListView(_.selected)
 	}
 	var image: Image = _
-	/*val usersCheckboxesList = ObservableBuffer[UserCheck]()
-	usersList.items = usersCheckboxesList*/
 
 	scene = new Scene {
 		root = new GridPane {
-			hgap = 10 //mW.height * 0.1
-			vgap = 10 //mW.width * 0.1
+			hgap = 10
+			vgap = 10
 			padding = Insets(10)
-			//			alignment = Pos.Center
-			writingButtons.setMaxWidth((mW.getWidth - 10) * 0.4)
-			writingButtons.setMaxHeight((mW.getHeight - 30) * 0.25)
-			//val gc = paintingArea.getGraphicsContext2D
-			PaintingController.gc.fill = Color.White
-			PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
+			//	PaintingController.gc.fill = Color.White
+			//	PaintingController.gc.fillRect(0, 0, paintingArea.getWidth, paintingArea.getHeight)
 			add(paintingButtons, 0, 1, 1, 1)
 			add(writtenText, 1, 1, 1, 1)
 			add(stack, 0, 0, 1, 1)
@@ -179,9 +157,9 @@ object MainWindow extends JFXApp.PrimaryStage {
 						Controller.talking = false
 						text = "talk"
 						usersList.visible = true
+						//remove from talk message
 					}
 				}
-
 			}, 2, 1, 1, 1)
 		}
 	}

@@ -15,32 +15,33 @@ import scala.pickling.json._
 /**
 	* Created by kass on 22.10.16.
 	*/
-object Listner {
-	def props(): Props = Props(new Listner())
+object Listener {
+	def props(): Props = Props(new Listener())
 }
-class Listner extends Actor {
+
+class Listener extends Actor {
 	override def receive = {
 		case x: ByteString =>
-			//	println(x.decodeString(Charset.defaultCharset()))
-			val tmp = x.decodeString(Charset.defaultCharset())
 
+			val tmp = x.decodeString(Charset.defaultCharset())
 			tmp.unpickle[Message] match {
 				case a: TextMessage => Controller.showText(a)
 				case a: PaintingMessage => PaintingController.paintMessage(a)
-				case a: CheckMessage => {
-					Controller.changeScreen(a.check)
-					if (a.check) {
-					sender() ! ByteString(LoggedMessage(a.id).pickle.value)
-					}
-				}
+				case CheckMessage(id, check, "LOGIN") =>
+					Controller.changeScreen(check)
+					if (check) sender() ! ByteString(LoggedMessage(id).pickle.value)
+				case CheckMessage(id, check, "REGISTER") =>
+					if (check) Controller.showInfo("registration success")
+					else Controller.showInfo("registration failed")
+				case CheckMessage(id, check, action) => //
 				case a: ConnectMessage => Controller.id = a.id
 				case a: AvailableUsers => Controller.showUsers(a.getUsers)
 				case a: TalkMessage => Controller.beginTalk(a)
 				case a: OkMessage => //
-				case b: Any => println("another error (no such Send type) " + b.toString)
+				case b: Any => println("no such Send type error: " + b.getClass.toString)
 			}
-		case x: String => println("dostałem Stringa" + x)
-		case c@Connected(remote, local) => println("ok! Connected!")
-		case b: Any => println("some error(massage not a string) " + b.toString)
+		case x: String => println(x)
+		case c@Connected(remote, local) => //
+		case b: Any => println("massage not a ByteString: " + b.getClass.toString)
 	}
 }

@@ -8,24 +8,24 @@ import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, Label, TextField}
+import scalafx.scene.control.{Button, Label, PasswordField, TextField}
 import scalafx.scene.layout.{HBox, VBox}
 
 
 object LoginWindow extends JFXApp.PrimaryStage {
 	title = "communicator"
 	val login = new TextField()
-	val password = new TextField()
+	login.promptText = "Your username"
+	val password = new PasswordField()
+	password.promptText = "Your password"
 	val alertLabel = new Label(
-		text = "zły login lub hasło"
+		text = ""
 	)
-	alertLabel.visible = false
 	scene = new Scene {
 		root = new VBox {
 			spacing = 10
 			alignment = Pos.Center
 			padding = Insets(25)
-			//val btn = new Button()
 			children = Seq(
 				new Label(
 					text = "login"
@@ -35,23 +35,27 @@ object LoginWindow extends JFXApp.PrimaryStage {
 					text = "password"
 				),
 				password,
-				alertLabel, new HBox() {
-					children = Seq(new Button(
-						text = "log in"
-					) {
-						onAction = handle {
-							Controller.addCredentials(login.getText, password.getText, "LOGIN")
-							Controller.send(Controller.login.pickle.value)
-							//MainWindow.show()
-						}
-					},
+				alertLabel,
+				new HBox() {
+					children = Seq(
+						new Button(
+							text = "log in"
+						) {
+							onAction = handle {
+								Controller.addCredentials(login.text.value, password.text.value, "LOGIN")
+								Controller.send(Controller.login.pickle.value)
+								login.text = ""
+								password.text = ""
+							}
+						},
 						new Button(
 							text = "register"
 						) {
 							onAction = handle {
-								Controller.addCredentials(login.getText, password.getText, "REGISTER")
+								Controller.addCredentials(login.text.value, password.text.value, "REGISTER")
 								Controller.send(Controller.login.pickle.value)
-								//MainWindow.show()
+								login.text = ""
+								password.text = ""
 							}
 						}
 					)

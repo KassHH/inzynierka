@@ -11,5 +11,4 @@ object ServerMain extends App {
 	val connectionActor = system.actorOf(Props[Server], "server")
 	var login: CredentialsMessage = _
 	system.eventStream.subscribe(connectionActor, classOf[DeadLetter])
-
 }

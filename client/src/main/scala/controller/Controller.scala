@@ -15,7 +15,7 @@ import scalafx.application.{JFXApp, Platform}
 import scalafx.collections.ObservableBuffer
 
 /**
-	* Created by kass on 15.10.16.
+	* Created by Katarzyna Herman on 15.10.16.
 	*/
 object Controller extends JFXApp {
 
@@ -23,7 +23,7 @@ object Controller extends JFXApp {
 	stage = LoginWindow
 	val remote = new InetSocketAddress(Properties.PATH, Properties.PORT)
 	val system = ActorSystem("mySystem")
-	val listener = system.actorOf(Listner.props(), "handler")
+	val listener = system.actorOf(Listener.props(), "handler")
 	val connectionActor = system.actorOf(Client.props(remote, listener), "client")
 	var talkingWith: Map[Long, String] = _
 	var login: CredentialsMessage = _
@@ -46,8 +46,17 @@ object Controller extends JFXApp {
 				if (check) {
 					MainWindow.show()
 				} else {
-					LoginWindow.alertLabel.visible = true
+					showInfo("wrong credentials")
 				}
+			}
+		})
+	}
+
+	def showInfo(info: String): Unit = {
+		Platform.runLater(new Runnable {
+			override def run(): Unit = {
+				LoginWindow.alertLabel.text = info
+				LoginWindow.alertLabel.visible = true
 			}
 		})
 	}
@@ -56,7 +65,10 @@ object Controller extends JFXApp {
 		Platform.runLater(new Runnable {
 			override def run(): Unit = {
 				usersCheckboxesList.removeAll(usersCheckboxesList)
-				usersCheckboxesList = ObservableBuffer[UserCheck](users map { case (id, name) => new UserCheck(name = name, id = id) } toBuffer).filter(a => a.getId != id)
+				usersCheckboxesList = ObservableBuffer[UserCheck](users map {
+					case (id, name) => new UserCheck(name = name, id = id)
+				} toBuffer)
+					.filter(a => a.getId != id)
 				MainWindow.usersList.items = usersCheckboxesList
 			}
 		})
@@ -75,12 +87,12 @@ object Controller extends JFXApp {
 
 	def showText(tM: TextMessage) = {
 		val textBuffer = MainWindow.receivedText.text.value
-		MainWindow.receivedText.text = textBuffer + tM.id + ": " + tM.text + "\n"
+		MainWindow.receivedText.text = textBuffer + talkingWith(tM.id) + ": " + tM.text + "\n"
+		//todo with who you talk?
 	}
 
 	def beginTalk(a: TalkMessage): Unit = {
 		Controller.talking = true
-		//todo with who you talk?
 		Controller.talkId = a.id
 		MainWindow.usersList.visible = false
 	}

@@ -21,7 +21,7 @@ object PaintingController {
 		gc.stroke = a.getFill
 		gc.beginPath()
 		val startPoint = a.getPoints.head
-		PaintingController.gc.moveTo(startPoint._1 - 10, startPoint._2 - 10)
+		PaintingController.gc.moveTo(startPoint._1, startPoint._2)
 		a.getPoints.foreach(a => PaintingController.gc.lineTo(a._1, a._2))
 		PaintingController.gc.strokePath()
 	}

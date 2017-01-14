@@ -13,4 +13,5 @@ class UserCheck(name: String, id: Long) {
 	def getId: Long = id
 
 	def getName: String = name
+
 }

@@ -22,7 +22,6 @@ class Handler extends Actor {
 
 	var myActor: ActorRef = _
 	var id: Long = _
-	//println(sender().path.name)
 	def receive = {
 		case Received(data) =>
 			myActor = sender()
@@ -30,7 +29,7 @@ class Handler extends Actor {
 			val byteData = ServerController.giveReply(stringData)
 			id = stringData.unpickle[model.messaging.Message].id
 			sender() ! Write(byteData)
-		case d: DeadLetter => println(d)
+		case d: DeadLetter => println(d.message)
 		case a: TextMessage =>
 			myActor ! Write(ByteString(a.pickle.value))
 		case a: PaintingMessage =>
@@ -45,8 +44,8 @@ class Handler extends Actor {
 			myActor ! Write(ByteString(b))
 		case a: model.messaging.Message =>
 			myActor ! Write(ByteString(a.pickle.value))
-		case a: ByteString => println("tu! " + a.decodeString(Charset.defaultCharset()))
-		case b: Any => println("nie wiadomo co przyszło: " + b)
+		case a: ByteString => println("ByteString: " + a.decodeString(Charset.defaultCharset()))
+		case b: Any => println(b.getClass.toString)
 	}
 }
 

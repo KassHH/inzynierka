@@ -24,7 +24,8 @@ class Client(remote: InetSocketAddress, listener: ActorRef) extends Actor {
 
 	def receive = {
 		case CommandFailed(_: Connect) =>
-			listener ! "connect failed"
+			listener ! "connection failed"
+			Controller.showInfo("connection failed")
 			context stop self
 
 		case c@Connected(remote, local) =>
@@ -42,6 +43,7 @@ class Client(remote: InetSocketAddress, listener: ActorRef) extends Actor {
 					connection ! Close
 				case _: ConnectionClosed =>
 					listener ! "connection closed"
+					Controller.showInfo("connection closed")
 					context stop self
 				case a: Any => println(a.toString)
 			}

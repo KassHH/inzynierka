@@ -23,15 +23,22 @@ object ServerController {
 	var count = 0
 	var users = new mutable.HashMap[String, String]
 
-	//	connectedUsers += ((123,"test1"),(321,"test2"))
+	if (new File(filename).exists()) {
+		val fileContents = Source.fromFile(filename).getLines().mkString
+		val registeredUsers = fileContents.unpickle[Map[String, String]]
+		users ++= registeredUsers
+	} else {
+		users += (("user", "pass"), ("user2", "123"))
+	}
+
 	def giveReply(request: String): ByteString = {
 		var reply: String = ""
-		println(request)
 		request.unpickle[Message] match {
 			case a: TextMessage =>
 				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
 				reply = OkMessage(a.id).pickle.value
 				tlk.foreach(c => c.tell(a, Server.connectionHandlers(a.id)))
+
 			case a: PaintingMessage =>
 				val tlk = talks(a.talkId).collect(Server.connectionHandlers)
 				reply = OkMessage(a.id).pickle.value
@@ -46,19 +53,17 @@ object ServerController {
 				if (users.contains(username)) {
 					users.update(username, password)
 					reply = CheckMessage(id, check = true, "PASS_CHANGE").pickle.value
-				} else {
-					reply = CheckMessage(id, check = false, "PASS_CHANGE").pickle.value
-				}
+				} else reply = CheckMessage(id, check = false, "PASS_CHANGE").pickle.value
+
 			case CredentialsMessage(id, username, password, "REGISTER") =>
 				if (!users.contains(username)) {
 					users += ((username, password))
 					ServerController.saveRegistered()
 					reply = CheckMessage(id, check = true, "REGISTER").pickle.value
-				} else {
-					reply = CheckMessage(id, check = false, "REGISTER").pickle.value
-				}
+				} else reply = CheckMessage(id, check = false, "REGISTER").pickle.value
 
-			case a: CheckMessage => print(a.check)
+
+			case a: CheckMessage => //
 			case a: LoggedMessage =>
 				val s = connectedUsers.keySet
 				val b = connectedUsers.toMap.pickle.value
@@ -79,14 +84,6 @@ object ServerController {
 				talkCount += 1
 		}
 		ByteString(reply)
-	}
-
-	if (new File(filename).exists()) {
-		val fileContents = Source.fromFile(filename).getLines().mkString
-		val registeredUsers = fileContents.unpickle[Map[String, String]]
-		users ++= registeredUsers
-	} else {
-		users += (("user", "pass"), ("user2", "123"), ("user3", "pass"), ("user4", "pass"))
 	}
 
 	def saveRegistered() = {
